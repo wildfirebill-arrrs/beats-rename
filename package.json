@@ -1,0 +1,20 @@
+{
+  "name": "beats-rename",
+  "version": "1.0.0",
+  "description": "WebUI music file renamer using MediaInfo and MusicBrainz",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "multer": "^2.0.0",    "cors": "^2.8.5",
+    "archiver": "^7.0.1",
+    "musicbrainz-api": "^0.4.0",
+    "uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

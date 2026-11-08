@@ -1,0 +1,55 @@
+:root { --bg:#0f1115; --card:#1a1d24; --fg:#e6e8ec; --muted:#9aa3b2; --accent:#4f8cff; --border:#2a2f3a; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+header { padding:20px 24px; border-bottom:1px solid var(--border); }
+h1 { margin:0 0 4px; font-size:22px; animation: beatFlash 1s steps(6, end) infinite; }
+.sub { margin:0 0 12px; color:var(--muted); font-size:13px; }
+.modebar button { background:var(--card); color:var(--fg); border:1px solid var(--border); padding:8px 14px; margin-right:8px; border-radius:6px; cursor:pointer; }
+.modebar button.active { background:var(--accent); border-color:var(--accent); }
+main { padding:20px 24px; display:flex; flex-direction:column; gap:16px; max-width:1400px; }
+.panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; }
+.panel h2 { margin:0 0 10px; font-size:16px; }
+.hidden { display:none; }
+.dropzone { border:2px dashed var(--border); border-radius:10px; padding:40px; text-align:center; cursor:pointer; transition:.15s; }
+.dropzone.over { border-color:var(--accent); background:#1f2430; }
+.dz-inner p { margin:4px; }
+.hint { color:var(--muted); font-size:12px; }
+.row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0; }
+.row input[type=text], #template { flex:1; min-width:260px; padding:8px; background:#0f1115; color:var(--fg); border:1px solid var(--border); border-radius:6px; }
+button { background:var(--card); color:var(--fg); border:1px solid var(--border); padding:8px 14px; border-radius:6px; cursor:pointer; }
+button.primary { background:var(--accent); border-color:var(--accent); }
+.browser .crumbs { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+.filelist { list-style:none; padding:0; margin:0; max-height:320px; overflow:auto; border:1px solid var(--border); border-radius:6px; }
+.filelist li { padding:6px 10px; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+.filelist li.dir span { cursor:pointer; color:var(--accent); }
+.selbar { margin-top:8px; display:flex; gap:8px; align-items:center; }
+.tablewrap { overflow:auto; max-height:420px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th,td { padding:8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+th { position:sticky; top:0; background:var(--card); }
+td.preview { color:var(--accent); }
+#log { background:#0a0c10; padding:10px; border-radius:6px; max-height:260px; overflow:auto; font-family:monospace; font-size:12px; white-space:pre-wrap; }
+.login-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:100; }
+.login-overlay.hidden { display:none; }
+.hp-wrap { position:relative; width:416px; margin:110px auto 0; }
+.login-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:28px 36px; width:360px; margin:0 auto; position:relative; z-index:1; }
+.login-card h2 { margin:0 0 16px; }
+.login-card input { width:100%; padding:10px; margin-bottom:10px; background:#0f1115; color:var(--fg); border:1px solid var(--border); border-radius:6px; }
+.login-card button { width:100%; }
+.appname { text-align:center; margin:8px 0 4px; font-size:24px; animation: beatFlash 1s steps(6, end) infinite; }
+.hp-band path { animation: beatFlash 1s steps(6, end) infinite; }
+@keyframes beatFlash {
+  0% { color:#ff3b3b; stroke:#ff3b3b; }
+  16% { color:#ff9500; stroke:#ff9500; }
+  33% { color:#ffcc00; stroke:#ffcc00; }
+  50% { color:#34c759; stroke:#34c759; }
+  66% { color:#007aff; stroke:#007aff; }
+  83% { color:#af52de; stroke:#af52de; }
+  100% { color:#ff3b3b; stroke:#ff3b3b; }
+}
+.hp-band { position:absolute; top:-100px; left:50%; transform:translateX(-50%); pointer-events:none; z-index:0; }
+.hp-ear { position:absolute; top:10px; width:28px; height:74px; background:var(--accent); border-radius:14px; z-index:0; }
+.hp-ear.left { left:0; }
+.hp-ear.right { right:0; }
+.err { color:#ff6b6b; font-size:13px; margin-top:8px; min-height:18px; }
+code { background:#0a0c10; padding:2px 6px; border-radius:4px; font-size:12px; }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beats Rename - Music File Renamer</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="loginOverlay" class="login-overlay">
+  <div class="hp-wrap">
+    <svg class="hp-band" viewBox="0 0 416 120" width="416" height="120" aria-hidden="true">
+      <path d="M14 110 C14 10, 402 10, 402 110" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round"/>
+    </svg>
+    <div class="hp-ear left"></div>
+    <div class="hp-ear right"></div>
+    <div class="login-card">
+      <h1 class="appname">Beats Rename</h1>
+      <p class="sub" style="text-align:center;margin-bottom:16px;">Sign in to continue</p>
+      <form id="loginForm">
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="username" />
+        <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" />
+        <button type="submit" class="primary">Sign in</button>
+        <div id="loginErr" class="err"></div>
+      </form>
+    </div>
+  </div>
+</div>
+<header>
+  <h1>Beats Rename</h1>
+  <p class="sub">Rename music files using MediaInfo tags + MusicBrainz. Drag & drop locally, or browse your seedbox home folder.</p>
+  <div class="modebar">
+    <button id="modeLocal" class="active">Local (drag & drop)</button>
+    <button id="modeSeed">Seedbox (browse home)</button>
+  </div>
+</header>
+
+<main>
+  <section id="localPanel" class="panel">
+    <div id="dropzone" class="dropzone">
+      <div class="dz-inner">
+        <p>Drag & drop music files here</p>
+        <p class="hint">or click to select</p>
+        <input type="file" id="fileInput" multiple accept="audio/*,.mp3,.flac,.m4a,.ogg,.opus,.wav,.aac,.wma" hidden>
+      </div>
+    </div>
+    <div id="uploadStatus"></div>
+  </section>
+
+  <section id="seedPanel" class="panel hidden">
+    <div class="browser">
+      <div class="crumbs">
+        <button id="goUp">..</button>
+        <span id="curPath">.</span>
+      </div>
+      <ul id="fileList" class="filelist"></ul>
+      <div class="selbar">
+        <button id="selectAll">Select all audio</button>
+        <button id="clearSel">Clear</button>
+        <span id="selCount">0 selected</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Template</h2>
+    <p class="hint">Tokens: {track}, {track:2}, {title}, {artist}, {album}, {albumartist}, {year}, {genre}, {disc}, {composer}, {filename}, {ext}, {duration}. Example: <code>{track:2} - {artist} - {title}</code></p>
+    <div class="row">
+      <input id="template" value="{track:2} - {artist} - {title}" />
+      <label><input type="checkbox" id="mbEnrich"> Enrich via MusicBrainz</label>
+      <label><input type="checkbox" id="renameNonMusic" checked> Rename non-music to folder name</label>
+    </div>
+    <div class="row">
+      <button id="analyzeBtn">Analyze</button>
+      <button id="renameBtn" class="primary">Rename</button>
+      <button id="downloadBtn" class="hidden">Download ZIP</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Files</h2>
+    <div class="tablewrap">
+      <table id="metaTable">
+        <thead><tr><th>Sel</th><th>File</th><th>Title</th><th>Artist</th><th>Album</th><th>Track</th><th>Year</th><th>New name (preview)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Log</h2>
+    <pre id="log"></pre>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -418,7 +418,7 @@ app.post('/api/rename', async (req, res) => {
       }
       const dir = path.dirname(full);
       const finalExt = (info.ext || ext || path.extname(full).replace(/^\./, '')).toLowerCase();
-      const finalName = newName.endsWith('.' + finalExt) ? newName : `${newName}.${finalExt}`;
+      let finalName = newName.endsWith('.' + finalExt) ? newName : `${newName}.${finalExt}`;
       let newPath = path.join(dir, finalName);
       if (newPath === full) {
         ops.push({ file: f, ok: true, skipped: true, newName: finalName });

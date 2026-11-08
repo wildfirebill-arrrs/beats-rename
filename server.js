@@ -233,6 +233,30 @@ app.get('/api/me', (req, res) => {
   res.json({ user });
 });
 
+// Recursive file listing (for bulk folder selection)
+app.get('/api/list-recursive', (req, res) => {
+  try {
+    const dir = safeResolve(req.query.path || '');
+    const stat = fs.statSync(dir);
+    if (!stat.isDirectory()) return res.status(400).json({ error: 'Not a directory' });
+    const out = [];
+    function walk(d) {
+      let entries;
+      try { entries = fs.readdirSync(d, { withFileTypes: true }); }
+      catch (_) { return; }
+      for (const e of entries) {
+        const full = path.join(d, e.name);
+        if (e.isDirectory()) walk(full);
+        else out.push(path.relative(ROOT_DIR, full).replace(/\\/g, '/'));
+      }
+    }
+    walk(dir);
+    res.json({ files: out });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // List directory (seedbox mode)
 app.get('/api/list', (req, res) => {
   try {

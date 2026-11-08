@@ -103,12 +103,34 @@ async function loadDir(p) {
     li.className = e.isDir ? 'dir' : 'file';
     const cb = document.createElement('input');
     cb.type = 'checkbox';
-    cb.disabled = e.isDir;
     cb.dataset.path = e.path;
-    if (state.seedSelected.has(e.path)) cb.checked = true;
-    cb.addEventListener('change', () => {
-      if (cb.checked) state.seedSelected.add(e.path); else state.seedSelected.delete(e.path);
-      updateSelCount();
+    cb.dataset.isdir = e.isDir ? '1' : '0';
+    if (e.isDir) {
+      // folder: checked if all its files are selected (approx: any selected)
+      cb.checked = false;
+    } else {
+      cb.checked = state.seedSelected.has(e.path);
+    }
+    cb.addEventListener('change', async () => {
+      if (e.isDir) {
+        // expand folder recursively
+        try {
+          const r = await fetch('/api/list-recursive?path=' + encodeURIComponent(e.path));
+          const data = await r.json();
+          const files = data.files || [];
+          if (cb.checked) {
+            files.forEach(f => state.seedSelected.add(f));
+          } else {
+            files.forEach(f => state.seedSelected.delete(f));
+          }
+          updateSelCount();
+          renderTable();
+        } catch (err) { log('Folder expand error: ' + err.message); cb.checked = !cb.checked; }
+      } else {
+        if (cb.checked) state.seedSelected.add(e.path); else state.seedSelected.delete(e.path);
+        updateSelCount();
+        renderTable();
+      }
     });
     const span = document.createElement('span');
     span.textContent = e.name + (e.isDir ? '/' : '');

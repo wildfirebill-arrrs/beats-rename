@@ -39,6 +39,9 @@
 ### Seedbox Home-Folder Browser
 ![Beats Rename seedbox mode browsing home folder and selecting audio files](assets/screenshot-seedbox.png)
 
+### Seedbox Running
+![Beats Rename running on a seedbox (Ultra.cc) showing renamed tracks](assets/screenshot-seedbox-working.png)
+
 ## Quick Start
 
 ```bash

@@ -75,10 +75,23 @@ Example template: `{track:2} - {artist} - {title}` → `04 - Allan Gallego - Sta
 
 1. Install Node.js via the [unofficial language installer](https://docs.ultra.cc/unofficial-language-installers/install-nodejs).
 2. Ensure `mediainfo` is on PATH (`mediainfo --version`).
-3. Upload this folder to your slot (e.g. `~/apps/beats-rename`).
-4. `cd ~/apps/beats-rename && npm install --production`
+3. Clone the repo into your slot:
+   ```bash
+   mkdir -p ~/apps && cd ~/apps
+   git clone https://github.com/wildfirebill-arrrs/beats-rename.git
+   cd beats-rename
+   ```
+4. `npm install --production`
 5. Run: `PORT=3000 ROOT_DIR=$HOME node server.js` (or use pm2/screen).
 6. Access via your slot's reverse proxy / port.
+
+### Update to latest version
+```bash
+cd ~/apps/beats-rename
+git pull
+npm install --production
+# restart the app
+```
 
 ### Run as a service (screen)
 ```bash

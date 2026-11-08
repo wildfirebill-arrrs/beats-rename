@@ -276,8 +276,21 @@ $('renameBtn').addEventListener('click', async () => {
       }
     });
     state.lastRename = data.ops;
+    // uncheck all rows and clear selections after rename
+    document.querySelectorAll('#metaTable input[type=checkbox]').forEach(cb => cb.checked = false);
+    state.seedSelected.clear();
+    state.analyzed = {};
+    if (state.mode === 'seed') {
+      // reload directory to reflect new names
+      loadDir(state.seedPath);
+      renderTable();
+    } else {
+      // local: clear uploaded list (files renamed in session dir; download zip)
+      state.files = [];
+      renderTable();
+    }
+    updateSelCount();
     if (state.mode === 'local' && state.sessionId) $('downloadBtn').classList.remove('hidden');
-    // refresh analyzed names not needed
   } catch (e) { log('Rename error: ' + e.message); }
 });
 

@@ -84,7 +84,7 @@ Example template: `{track:2} - {artist} - {title}` → `04 - Allan Gallego - Sta
    git clone https://github.com/wildfirebill-arrrs/beats-rename.git
    cd beats-rename
    ```
-4. `npm install --production`
+4. `npm install --omit=dev`
 5. Run: `PORT=3000 ROOT_DIR=$HOME node server.js` (or use pm2/screen).
 6. Access via your slot's reverse proxy / port.
 
@@ -92,7 +92,7 @@ Example template: `{track:2} - {artist} - {title}` → `04 - Allan Gallego - Sta
 ```bash
 cd ~/apps/beats-rename
 git pull
-npm install --production
+npm install --omit=dev
 # restart the app
 ```
 

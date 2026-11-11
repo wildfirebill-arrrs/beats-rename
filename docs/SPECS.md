@@ -14,7 +14,14 @@ WebUI Node.js app for renaming music files using MediaInfo tags and MusicBrainz 
 - `POST /api/login`, `POST /api/logout`.
 
 ## Rename template tokens
-`{track}` (or `{track:N}` zero-pad), `{title}`, `{artist}`, `{album}`, `{albumartist}`, `{year}`, `{genre}`, `{disc}`, `{composer}`, `{filename}`, `{ext}`, `{duration}`, `{folder}`.
+`{track}` (or `{track:N}` zero-pad), `{title}`, `{title_orig}`, `{artist}`, `{album}`, `{albumartist}`, `{year}`, `{genre}`, `{disc}`, `{composer}`, `{filename}`, `{ext}`, `{duration}`, `{folder}`.
+
+## Additional routes
+- `GET /api/presets` — list presets (built-in + user)
+- `POST /api/presets` — save/upsert preset `{name, template}`
+- `DELETE /api/presets/:name` — delete user preset
+- `POST /api/translate` — translate text `{text, to}`
+- `GET /api/list-recursive?path=` — recursive file listing (bulk folders)
 
 ## Non-music handling
 Files whose extension is not in AUDIO_EXTS are renamed to parent folder basename + original extension when `renameNonMusic` is true.

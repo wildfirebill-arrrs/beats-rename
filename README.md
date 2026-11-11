@@ -29,6 +29,11 @@
 - **Track title translation** (Google Translate + MyMemory fallback) to 12 languages
 - **Non-music files** (covers, .nfo, .m3u) renamed to the folder name
 - **Password-protected WebUI** — cookie sessions, rate-limited login
+- **Persistent preset templates** — save/load/delete rename templates (survive restarts)
+- **Track title translation** to 12 languages (Google + MyMemory, custom endpoint support)
+- **Bulk folder selection** — select a folder to include all files recursively
+- **Non-music files** (covers, .nfo, .m3u) renamed to the folder name
+- **Favicon** and social preview card
 - **Path-traversal-safe** browsing restricted to `ROOT_DIR`
 - Works on **Ultra.cc seedbox** via unofficial Node.js installer
 

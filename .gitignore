@@ -1,5 +1,7 @@
 node_modules/
 test/
+test2/
+test*/
 .auth
 .secret
 *.log

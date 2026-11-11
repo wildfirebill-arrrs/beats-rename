@@ -226,6 +226,13 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+// Translation test endpoint
+app.post('/api/translate', async (req, res) => {
+  const { text, to } = req.body || {};
+  const r = await translateText(text || '', to || 'en');
+  res.json(r);
+});
+
 app.get('/api/me', (req, res) => {
   const cookies = parseCookies(req);
   const user = verifyToken(cookies.br_session);
@@ -428,13 +435,17 @@ app.post('/api/rename', async (req, res) => {
 
       // Translation of track title
       let translated = false;
+      let translateError = null;
+      let translateProvider = null;
       if (isAudio && translateTo && translateTo !== 'none') {
         const orig = info.tags.Title || info.tags.title;
         if (orig) {
-          const tr = await translateText(orig, translateTo);
-          if (tr && tr !== orig) {
+          const res = await translateText(orig, translateTo);
+          translateProvider = res.provider;
+          translateError = res.error;
+          if (res.text && res.text !== orig) {
             info.tags.TitleOriginal = orig;
-            info.tags.Title = tr;
+            info.tags.Title = res.text;
             translated = true;
           }
         }
@@ -472,7 +483,7 @@ app.post('/api/rename', async (req, res) => {
         newPath = path.join(dir, finalName);
       }
       fs.renameSync(full, newPath);
-      ops.push({ file: f, ok: true, oldName: path.basename(full), newName: finalName, translated });
+      ops.push({ file: f, ok: true, oldName: path.basename(full), newName: finalName, translated, translateProvider, translateError });
     } catch (e) {
       ops.push({ file: f, ok: false, error: e.message });
     }
@@ -510,17 +521,28 @@ function applyMB(info, rec) {
 }
 
 async function translateText(text, target) {
-  if (!text || !target || target === 'none') return text;
+  if (!text || !target || target === 'none') return { text, provider: null, error: null };
+  // Try Google Translate (unofficial)
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
-    const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' } });
-    const data = await r.json();
-    // data[0] is array of [translated, original, ...]
-    const out = (data[0] || []).map(x => x[0]).join('');
-    return out || text;
-  } catch (_) {
-    return text;
-  }
+    const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' }, signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const data = await r.json();
+      const out = (data[0] || []).map(x => x[0]).join('');
+      if (out && out !== text) return { text: out, provider: 'google', error: null };
+    }
+  } catch (e) { /* fall through */ }
+  // Fallback: MyMemory
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${encodeURIComponent(target)}`;
+    const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' }, signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      const data = await r.json();
+      const out = data?.responseData?.translatedText;
+      if (out && out !== text) return { text: out, provider: 'mymemory', error: null };
+    }
+  } catch (e) { /* fall through */ }
+  return { text, provider: null, error: 'all providers failed or returned same text' };
 }
 
 function renderTemplate(tpl, info) {

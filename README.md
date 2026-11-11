@@ -113,6 +113,7 @@ screen -S beats -dm bash -c 'cd ~/apps/beats-rename && PORT=3000 ROOT_DIR=$HOME 
 | `AUTH_PASS` | auto-generated | Login password |
 | `AUTH_SECRET` | auto-generated | Session cookie signing secret |
 | `FORCE_SECURE` | unset | Set `1` for HTTPS behind a reverse proxy |
+| `TRANSLATE_URL` | unset | Custom LibreTranslate endpoint (if public providers are blocked) |
 
 ## Authentication
 

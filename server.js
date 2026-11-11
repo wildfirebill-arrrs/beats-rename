@@ -592,7 +592,24 @@ function applyMB(info, rec) {
 
 async function translateText(text, target) {
   if (!text || !target || target === 'none') return { text, provider: null, error: null };
-  // Try Google Translate (unofficial)
+  const errors = [];
+  // 1. Custom endpoint (TRANSLATE_URL env) — for self-hosted LibreTranslate etc.
+  if (process.env.TRANSLATE_URL) {
+    try {
+      const r = await fetch(process.env.TRANSLATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: text, source: 'auto', target }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const out = data?.translatedText || data?.result || (Array.isArray(data) ? data[0] : null);
+        if (out && out !== text) return { text: out, provider: 'custom', error: null };
+      } else errors.push('custom:' + r.status);
+    } catch (e) { errors.push('custom:' + e.message); }
+  }
+  // 2. Google Translate (unofficial)
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
     const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' }, signal: AbortSignal.timeout(8000) });
@@ -600,9 +617,9 @@ async function translateText(text, target) {
       const data = await r.json();
       const out = (data[0] || []).map(x => x[0]).join('');
       if (out && out !== text) return { text: out, provider: 'google', error: null };
-    }
-  } catch (e) { /* fall through */ }
-  // Fallback: MyMemory
+    } else errors.push('google:' + r.status);
+  } catch (e) { errors.push('google:' + e.message); }
+  // 3. MyMemory
   try {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${encodeURIComponent(target)}`;
     const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' }, signal: AbortSignal.timeout(8000) });
@@ -610,9 +627,9 @@ async function translateText(text, target) {
       const data = await r.json();
       const out = data?.responseData?.translatedText;
       if (out && out !== text) return { text: out, provider: 'mymemory', error: null };
-    }
-  } catch (e) { /* fall through */ }
-  return { text, provider: null, error: 'all providers failed or returned same text' };
+    } else errors.push('mymemory:' + r.status);
+  } catch (e) { errors.push('mymemory:' + e.message); }
+  return { text, provider: null, error: errors.join('; ') || 'all providers failed or returned same text' };
 }
 
 function renderTemplate(tpl, info) {

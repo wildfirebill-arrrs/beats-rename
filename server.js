@@ -427,12 +427,16 @@ app.post('/api/rename', async (req, res) => {
       }
 
       // Translation of track title
+      let translated = false;
       if (isAudio && translateTo && translateTo !== 'none') {
         const orig = info.tags.Title || info.tags.title;
         if (orig) {
           const tr = await translateText(orig, translateTo);
-          info.tags.TitleOriginal = orig;
-          info.tags.Title = tr;
+          if (tr && tr !== orig) {
+            info.tags.TitleOriginal = orig;
+            info.tags.Title = tr;
+            translated = true;
+          }
         }
       }
 
@@ -468,7 +472,7 @@ app.post('/api/rename', async (req, res) => {
         newPath = path.join(dir, finalName);
       }
       fs.renameSync(full, newPath);
-      ops.push({ file: f, ok: true, oldName: path.basename(full), newName: finalName });
+      ops.push({ file: f, ok: true, oldName: path.basename(full), newName: finalName, translated });
     } catch (e) {
       ops.push({ file: f, ok: false, error: e.message });
     }

@@ -294,7 +294,7 @@ $('renameBtn').addEventListener('click', async () => {
     (data.ops || []).forEach(op => {
       if (op.ok) {
         if (op.skipped) log(`skip ${op.newName}`);
-        else log(`OK ${op.oldName} -> ${op.newName}`);
+        else log(`OK ${op.oldName} -> ${op.newName}${op.translated ? ' (translated)' : ''}`);
       } else {
         log(`FAIL ${op.file}: ${op.error}`);
       }

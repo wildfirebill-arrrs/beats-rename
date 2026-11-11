@@ -26,6 +26,7 @@
 - **MediaInfo tag extraction** — title, artist, album, track number, year, genre, disc
 - **MusicBrainz enrichment** — canonical recording match with studio-album preference
 - **Flexible rename templates** with zero-padding (`{track:2}`)
+- **Track title translation** (Google Translate + MyMemory fallback) to 12 languages
 - **Non-music files** (covers, .nfo, .m3u) renamed to the folder name
 - **Password-protected WebUI** — cookie sessions, rate-limited login
 - **Path-traversal-safe** browsing restricted to `ROOT_DIR`

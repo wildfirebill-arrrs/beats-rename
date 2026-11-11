@@ -66,6 +66,14 @@
     <h2>Template</h2>
     <p class="hint">Tokens: {track}, {track:2}, {title}, {title_orig}, {artist}, {album}, {albumartist}, {year}, {genre}, {disc}, {composer}, {filename}, {ext}, {duration}, {folder}. Enable "Translate titles to" to translate {title}. Example: <code>{track:2} - {artist} - {title}</code></p>
     <div class="row">
+      <label>Preset:
+        <select id="presetSelect"></select>
+      </label>
+      <button id="presetLoadBtn">Load</button>
+      <button id="presetSaveBtn">Save current as preset</button>
+      <button id="presetDeleteBtn">Delete preset</button>
+    </div>
+    <div class="row">
       <input id="template" value="{track:2} - {artist} - {title}" />
       <label><input type="checkbox" id="mbEnrich"> Enrich via MusicBrainz</label>
       <label><input type="checkbox" id="renameNonMusic" checked> Rename non-music to folder name</label>

@@ -157,8 +157,25 @@ $('clearSel').addEventListener('click', () => {
 });
 function updateSelCount() { $('selCount').textContent = state.seedSelected.size + ' selected'; }
 
+async function loadPresets() {
+  try {
+    const r = await fetch('/api/presets');
+    const data = await r.json();
+    const sel = $('presetSelect');
+    sel.innerHTML = '';
+    (data.presets || []).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name + (p.builtin ? ' (built-in)' : '');
+      opt.dataset.template = p.template;
+      opt.dataset.builtin = p.builtin ? '1' : '0';
+      sel.appendChild(opt);
+    });
+  } catch (e) { log('Preset load error: ' + e.message); }
+}
 function init() {
   loadDir('');
+  loadPresets();
 }
 // boot
 checkAuth().then(ok => { if (ok) init(); });
@@ -263,6 +280,51 @@ function renderClient(tpl, info) {
 }
 
 $('template').addEventListener('input', renderTable);
+
+// Presets
+$('presetLoadBtn').addEventListener('click', () => {
+  const sel = $('presetSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.template) {
+    $('template').value = opt.dataset.template;
+    renderTable();
+    log('Loaded preset: ' + opt.value);
+  }
+});
+$('presetSaveBtn').addEventListener('click', async () => {
+  const name = prompt('Preset name:');
+  if (!name) return;
+  try {
+    const r = await fetch('/api/presets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, template: $('template').value }),
+    });
+    const data = await r.json();
+    if (!r.ok) { log('Save failed: ' + (data.error || r.status)); return; }
+    await loadPresets();
+    // select the new preset
+    const sel = $('presetSelect');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === name) { sel.selectedIndex = i; break; }
+    }
+    log('Saved preset: ' + name);
+  } catch (e) { log('Save error: ' + e.message); }
+});
+$('presetDeleteBtn').addEventListener('click', async () => {
+  const sel = $('presetSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return;
+  if (opt.dataset.builtin === '1') { log('Cannot delete built-in preset'); return; }
+  if (!confirm('Delete preset "' + opt.value + '"?')) return;
+  try {
+    const r = await fetch('/api/presets/' + encodeURIComponent(opt.value), { method: 'DELETE' });
+    const data = await r.json();
+    if (!r.ok) { log('Delete failed: ' + (data.error || r.status)); return; }
+    await loadPresets();
+    log('Deleted preset: ' + opt.value);
+  } catch (e) { log('Delete error: ' + e.message); }
+});
 $('translateTo').addEventListener('change', () => {
   const files = currentFiles();
   if (files.length) $('analyzeBtn').click();

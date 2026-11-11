@@ -13,6 +13,39 @@ const os = require('os');
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = process.env.ROOT_DIR || process.env.HOME || process.env.USERPROFILE || process.cwd();
 const UPLOAD_DIR = path.join(os.tmpdir(), 'beats-rename-uploads');
+const PRESETS_DIR = path.join(os.homedir(), '.beats-rename');
+const PRESETS_FILE = path.join(PRESETS_DIR, 'presets.json');
+
+const BUILTIN_PRESETS = [
+  { name: 'Track - Artist - Title', template: '{track:2} - {artist} - {title}', builtin: true },
+  { name: 'Artist - Title', template: '{artist} - {title}', builtin: true },
+  { name: 'Artist - Album - Track - Title', template: '{artist} - {album} - {track:2} - {title}', builtin: true },
+  { name: 'Track. Artist - Title', template: '{track:2}. {artist} - {title}', builtin: true },
+];
+
+function loadPresets() {
+  let user = [];
+  try {
+    if (fs.existsSync(PRESETS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(PRESETS_FILE, 'utf8'));
+      if (Array.isArray(data)) user = data;
+    }
+  } catch (_) {}
+  // merge, user overrides builtin by name
+  const map = new Map();
+  for (const p of BUILTIN_PRESETS) map.set(p.name, { ...p });
+  for (const p of user) {
+    if (p && p.name && p.template) map.set(p.name, { name: p.name, template: p.template, builtin: false });
+  }
+  return Array.from(map.values());
+}
+function savePresets(list) {
+  try {
+    fs.mkdirSync(PRESETS_DIR, { recursive: true });
+    const user = list.filter(p => !p.builtin).map(p => ({ name: p.name, template: p.template }));
+    fs.writeFileSync(PRESETS_FILE, JSON.stringify(user, null, 2), { mode: 0o600 });
+  } catch (e) { throw e; }
+}
 const MAX_UPLOAD_MB = parseInt(process.env.MAX_UPLOAD_MB || '200', 10);
 const AUDIO_EXTS = new Set(['mp3','flac','m4a','m4b','m4p','aac','ogg','oga','opus','wav','wma','ape','aiff','aif','alac','dsf','dff','mp2','mpa','webm']);
 
@@ -262,6 +295,31 @@ app.get('/api/list-recursive', (req, res) => {
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
+});
+
+// ---------- presets ----------
+app.get('/api/presets', (req, res) => {
+  res.json({ presets: loadPresets() });
+});
+app.post('/api/presets', (req, res) => {
+  const { name, template } = req.body || {};
+  if (!name || !template) return res.status(400).json({ error: 'name and template required' });
+  const list = loadPresets();
+  const idx = list.findIndex(p => p.name === name);
+  if (idx >= 0) list[idx] = { name, template, builtin: list[idx].builtin };
+  else list.push({ name, template, builtin: false });
+  try { savePresets(list); } catch (e) { return res.status(500).json({ error: e.message }); }
+  res.json({ ok: true, presets: loadPresets() });
+});
+app.delete('/api/presets/:name', (req, res) => {
+  const name = decodeURIComponent(req.params.name);
+  const list = loadPresets();
+  const target = list.find(p => p.name === name);
+  if (!target) return res.status(404).json({ error: 'not found' });
+  if (target.builtin) return res.status(400).json({ error: 'cannot delete builtin preset' });
+  const next = list.filter(p => p.name !== name);
+  try { savePresets(next); } catch (e) { return res.status(500).json({ error: e.message }); }
+  res.json({ ok: true, presets: loadPresets() });
 });
 
 // List directory (seedbox mode)

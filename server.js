@@ -3,7 +3,7 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const archiver = require('archiver');
+const AdmZip = require('adm-zip');
 const { v4: uuidv4 } = require('uuid');
 const { execFile } = require('child_process');
 const fs = require('fs');
@@ -588,12 +588,16 @@ function renderTemplate(tpl, info) {
 app.get('/api/download/:sessionId', (req, res) => {
   const dir = path.join(UPLOAD_DIR, req.params.sessionId);
   if (!fs.existsSync(dir)) return res.status(404).send('Not found');
-  res.setHeader('Content-Type', 'application/zip');
-  res.setHeader('Content-Disposition', `attachment; filename="renamed-${req.params.sessionId}.zip"`);
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.pipe(res);
-  archive.directory(dir, false);
-  archive.finalize();
+  try {
+    const zip = new AdmZip();
+    zip.addLocalFolder(dir, '');
+    const buffer = zip.toBuffer();
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="renamed-${req.params.sessionId}.zip"`);
+    res.send(buffer);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
 
 // Config

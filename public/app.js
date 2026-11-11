@@ -172,7 +172,7 @@ $('analyzeBtn').addEventListener('click', async () => {
     const r = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode: state.mode === 'seed' ? 'seedbox' : 'upload', files }),
+      body: JSON.stringify({ mode: state.mode === 'seed' ? 'seedbox' : 'upload', files, translateTo: $('translateTo').value }),
     });
     const data = await r.json();
     (data.results || []).forEach(res => {
@@ -202,7 +202,7 @@ function renderTable() {
     const title = tags.Title || tags.title || '';
     const artist = tags.Artist || tags.artist || tags.Performer || '';
     const album = tags.Album || tags.album || '';
-    const track = tags.Track || tags['Track/Position'] || tags.track || '';
+    const track = tags.Track_Position || tags['Track/Position'] || tags.TrackNumber || tags.Track || '';
     const year = tags.Date || tags.Year || tags.year || '';
     const preview = info ? previewName(info) : '';
     tr.innerHTML = `
@@ -263,6 +263,10 @@ function renderClient(tpl, info) {
 }
 
 $('template').addEventListener('input', renderTable);
+$('translateTo').addEventListener('change', () => {
+  const files = currentFiles();
+  if (files.length) $('analyzeBtn').click();
+});
 
 function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function escapeAttr(s) { return String(s).replace(/"/g,'&quot;'); }

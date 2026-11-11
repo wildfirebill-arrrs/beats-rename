@@ -306,8 +306,9 @@ app.post('/api/upload', upload.array('files', 200), (req, res) => {
 
 // Analyze files
 app.post('/api/analyze', async (req, res) => {
-  const { files } = req.body || {}; // array of relative paths (upload mode) OR absolute-ish seedbox paths
-  const mode = req.body.mode || 'upload'; // 'upload' | 'seedbox'
+  const { files } = req.body || {};
+  const mode = req.body.mode || 'upload';
+  const translateTo = req.body.translateTo || 'none';
   if (!Array.isArray(files) || !files.length) return res.status(400).json({ error: 'No files' });
   const results = [];
   for (const f of files) {
@@ -320,6 +321,17 @@ app.post('/api/analyze', async (req, res) => {
       let info;
       if (isAudio) {
         info = await runMediaInfo(full);
+        // translate title if requested
+        if (translateTo && translateTo !== 'none') {
+          const orig = info.tags.Title || info.tags.title;
+          if (orig) {
+            const tr = await translateText(orig, translateTo);
+            if (tr.text && tr.text !== orig) {
+              info.tags.TitleOriginal = orig;
+              info.tags.Title = tr.text;
+            }
+          }
+        }
       } else {
         info = { path: full, filename: path.basename(full), ext, isAudio: false, folderName: path.basename(path.dirname(full)), tags: {} };
       }

@@ -347,7 +347,7 @@ app.post('/api/lookup', async (req, res) => {
 
 // Rename
 app.post('/api/rename', async (req, res) => {
-  const { mode, sessionId, files, template, mbEnrich, renameNonMusic } = req.body || {};
+  const { mode, sessionId, files, template, mbEnrich, renameNonMusic, translateTo } = req.body || {};
   if (!Array.isArray(files) || !files.length) return res.status(400).json({ error: 'No files' });
   if (!template) return res.status(400).json({ error: 'No template' });
 
@@ -426,6 +426,16 @@ app.post('/api/rename', async (req, res) => {
         } catch (_) {}
       }
 
+      // Translation of track title
+      if (isAudio && translateTo && translateTo !== 'none') {
+        const orig = info.tags.Title || info.tags.title;
+        if (orig) {
+          const tr = await translateText(orig, translateTo);
+          info.tags.TitleOriginal = orig;
+          info.tags.Title = tr;
+        }
+      }
+
       let newName;
       if (!isAudio && renameNonMusic) {
         newName = info.folderName;
@@ -495,6 +505,20 @@ function applyMB(info, rec) {
   return info;
 }
 
+async function translateText(text, target) {
+  if (!text || !target || target === 'none') return text;
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
+    const r = await fetch(url, { headers: { 'User-Agent': 'beats-rename/1.0' } });
+    const data = await r.json();
+    // data[0] is array of [translated, original, ...]
+    const out = (data[0] || []).map(x => x[0]).join('');
+    return out || text;
+  } catch (_) {
+    return text;
+  }
+}
+
 function renderTemplate(tpl, info) {
   const tags = info.tags || {};
   const get = (key) => {
@@ -502,6 +526,7 @@ function renderTemplate(tpl, info) {
     // normalize keys
     const map = {
       title: tags.Title || tags.title,
+      title_orig: tags.TitleOriginal || tags.Title || tags.title,
       artist: tags.Artist || tags.artist || tags.Performer,
       album: tags.Album || tags.album,
       albumartist: tags.Album_Artist || tags.AlbumArtist || tags.albumartist,

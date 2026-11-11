@@ -231,6 +231,7 @@ function renderClient(tpl, info) {
     const lower = key.toLowerCase();
     const map = {
       title: tags.Title || tags.title,
+      title_orig: tags.TitleOriginal || tags.Title || tags.title,
       artist: tags.Artist || tags.artist || tags.Performer,
       album: tags.Album || tags.album,
       albumartist: tags.Album_Artist || tags.AlbumArtist,
@@ -286,6 +287,7 @@ $('renameBtn').addEventListener('click', async () => {
         template: tpl,
         mbEnrich: $('mbEnrich').checked,
         renameNonMusic: $('renameNonMusic').checked,
+        translateTo: $('translateTo').value,
       }),
     });
     const data = await r.json();
